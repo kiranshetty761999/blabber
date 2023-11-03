@@ -6,7 +6,7 @@ const userSchema = mongoose.Schema({
     email: { type: String, unique: true, required: true },
     password: { type: String, required: true },
     profilePic: String,
-}, { timeStamps: true })
+},   { timestamps: true })
 
 
 userSchema.methods.verifyPassword = async function (password) {
