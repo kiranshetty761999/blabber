@@ -6,7 +6,7 @@ const chatSchema = mongoose.Schema({
     latestMessage: { type: mongoose.Schema.Types.ObjectId, ref: "Message" },
     groupAdmin: { type: mongoose.Schema.Types.ObjectId, ref: "Message" },
     chatName: { type: String, trim: true }
-},   { timestamps: true })
+}, { timestamps: true })
 
 const Chat = mongoose.model("Chat", chatSchema)
 module.exports = Chat
