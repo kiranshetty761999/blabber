@@ -1,10 +1,12 @@
 import './App.css';
-import AuthLayout from './components/Auth/AuthLayout/AuthLayout';
+import AuthLayout from './pages/AuthLayout/AuthLayout';
+import ChatLayout from './pages/ChatLayout/ChatLayout';
 
 function App() {
   return (
     <div >
-     <AuthLayout/>
+      <ChatLayout/>
+     {/* <AuthLayout/> */}
     </div>
   );
 }

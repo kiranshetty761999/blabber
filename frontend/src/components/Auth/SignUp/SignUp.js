@@ -18,11 +18,12 @@ const SignUp = ()=>{
     };
     return (<>
       <div style={{ display: 'flex', alignItems: 'center', flexDirection: 'column', gap: 10 }}>
+      <TextField id="outlined-basic" label="Whisper your true name" variant="outlined"  sx={{ width: '100%' }} />
             <TextField
 
                 id="Email"
                 label="Spill the email beans!"
-                sx={{ width: '100%' }}
+                sx={{ width: '100%', m: 1 }}
 
             />
            <FormControl sx={{ m: 1, width: '100%' }} variant="outlined">
