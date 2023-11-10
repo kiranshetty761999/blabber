@@ -11,12 +11,16 @@ const login = async (req, res) => {
         const registeredUser = await User.findOne({ email: req.body.email })
 
         if (registeredUser && (await registeredUser.verifyPassword(req.body.password))) {
-            res.json({
+            const data = {
                 name: registeredUser.name,
                 email: registeredUser.email,
                 userId: registeredUser._id,
                 profilePic: registeredUser?.profilePic,
                 token: generateAccessToken(registeredUser._id)
+            }
+            res.json({
+                success: true,
+                data: data
             })
         } else {
             throw new Error("Email id or password does not exist")
@@ -47,12 +51,16 @@ const register = async (req, res) => {
         })
 
         if (userCreated) {
-            res.status(201).json({
+            const data = {
                 name: userCreated.name,
                 email: userCreated.email,
                 userId: userCreated._id,
                 profilePic: userCreated?.profilePic,
                 token: generateAccessToken(userCreated._id)
+            }
+            res.status(201).json({
+                data: data,
+                success: true
             })
         }
         else {

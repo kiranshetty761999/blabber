@@ -32,3 +32,8 @@
 .menuItem:hover{
     background-color: aliceblue;
 }
+
+.inputLabel{
+    margin-bottom: 0.5rem;
+    font-weight: 800;
+}

@@ -6,6 +6,7 @@ import moment from 'moment'
 import MessageNumber from '../../MessageNumber/MessageNumber';
 import Groups2Icon from '@mui/icons-material/Groups2';
 import ProfilePic from '../../ProfilePic/ProfilePic';
+import CreateGroup from '../../CreateGroupModal/CreateGroup';
 
 const ChatList = () => {
   const listOfChats = [
@@ -62,6 +63,7 @@ const ChatList = () => {
       <div className={classes.header}>
         <SearchBar className={classes.search} />
         <GroupAddIcon className={classes.groupAddIcon} />
+        {/* <CreateGroup/> */}
       </div>
       <div className={classes.chatList}>
         {listOfChats.map((chat) => (
