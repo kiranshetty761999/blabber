@@ -16,6 +16,7 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { SignUpOperation } from '../../../services/blabberApiHandler';
 import { updateSnackBar } from '../../../store/SnackBarSlice';
 import { useDispatch } from "react-redux";
+import { useNavigate } from 'react-router-dom'
 
 const SignUp = () => {
     const {
@@ -26,7 +27,7 @@ const SignUp = () => {
         formState: { errors },
         watch,
     } = useForm();
-
+    const navigate = useNavigate()
     const dispatch = useDispatch();
     const [showPassword, setShowPassword] = React.useState({
         password: false,
@@ -132,7 +133,7 @@ const SignUp = () => {
                 localStorage.setItem('userId', response?.data?.data?.userId)
                 localStorage.setItem('profilePic', response?.data?.data?.profilePic)
                 localStorage.setItem('token', response?.data?.data?.token)
-
+                navigate('/chats')
             }
             else {
                 dispatch(

@@ -3,11 +3,15 @@ const generateAccessToken = require('../config/generateToken')
 
 const login = async (req, res) => {
 
-    if (!req.body.email || !req.body.password) {
-        res.status(400)
-        throw new Error('Enter both email Id and password')
-    } else {
+    const emailRegex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i;
 
+    if (!req.body.email || !req.body.password) {
+        res.status(400);
+        throw new Error('Enter both email and password');
+    } else if (!emailRegex.test(req.body.email)) {
+        res.status(400);
+        throw new Error('Enter a valid email address');
+    } else {
         const registeredUser = await User.findOne({ email: req.body.email })
 
         if (registeredUser && (await registeredUser.verifyPassword(req.body.password))) {
@@ -25,30 +29,46 @@ const login = async (req, res) => {
         } else {
             throw new Error("Email id or password does not exist")
         }
-
     }
+
 
 }
 
 
 const register = async (req, res) => {
+    if (!req.body.name || !req.body.email || !req.body.password) {
+        res.status(400);
+        throw new Error('Please send all the details');
+    }
 
-    if (!req.body.name || !req.body.email || !req.body.password)
-        throw new Error("Please send all the details")
 
-    const userExists = await User.findOne({ email: req.body.email })
+    const emailRegex = /^\S+@\S+\.\S+/;
+
+    if (!emailRegex.test(req.body.email)) {
+        res.status(400);
+        throw new Error('Invalid email address');
+    }
+
+
+    const passwordRegex = /^(?=.*[0-9])(?=.*[!@#$%^&*])(.{8,})$/;
+
+    if (!passwordRegex.test(req.body.password)) {
+        res.status(400);
+        throw new Error('Password must have at least 8 characters with 1 special character and 1 number');
+    }
+
+    const userExists = await User.findOne({ email: req.body.email });
 
     if (userExists) {
-        res.status(400)
-        throw new Error('User already exists')
-    }
-    else {
+        res.status(400);
+        throw new Error('User already exists');
+    } else {
         const userCreated = await User.create({
             name: req.body.name,
             email: req.body.email,
             password: req.body.password,
             profilePic: req.body?.profilePic
-        })
+        });
 
         if (userCreated) {
             const data = {
@@ -57,19 +77,17 @@ const register = async (req, res) => {
                 userId: userCreated._id,
                 profilePic: userCreated?.profilePic,
                 token: generateAccessToken(userCreated._id)
-            }
+            };
             res.status(201).json({
                 data: data,
                 success: true
-            })
-        }
-        else {
-            res.status(400)
-            throw new Error('Failed to register the user')
+            });
+        } else {
+            res.status(400);
+            throw Error('Failed to register the user');
         }
     }
-
-}
+};
 
 const getBlabberUsers = (req, res) => {
     res.send('blabber users')

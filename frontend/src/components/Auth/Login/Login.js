@@ -13,12 +13,13 @@ import classes from './Login.module.css'
 import { loginOperation } from '../../../services/blabberApiHandler';
 import { updateSnackBar } from '../../../store/SnackBarSlice';
 import { useDispatch } from "react-redux";
+import { useNavigate } from 'react-router-dom'
 
 const Login = () => {
     const { register, handleSubmit, formState: { errors } } = useForm();
     const [showPassword, setShowPassword] = React.useState(false);
     const dispatch = useDispatch();
-    
+    const navigate = useNavigate()
     const handleClickShowPassword = () => setShowPassword((show) => !show);
 
     const handleMouseDownPassword = (event) => {
@@ -30,15 +31,15 @@ const Login = () => {
             email: data.email,
             password: data.password
         }
-        try{
+        try {
             const response = await loginOperation(payload)
             console.log(response?.data)
-            if(response?.data?.success)
-            {
-                localStorage.setItem('name',response?.data?.data?.name)
-                localStorage.setItem('userId',response?.data?.data?.userId)
-                localStorage.setItem('profilePic',response?.data?.data?.profilePic)
-                localStorage.setItem('token',response?.data?.data?.token)
+            if (response?.data?.success) {
+                localStorage.setItem('name', response?.data?.data?.name)
+                localStorage.setItem('userId', response?.data?.data?.userId)
+                localStorage.setItem('profilePic', response?.data?.data?.profilePic)
+                localStorage.setItem('token', response?.data?.data?.token)
+                navigate('/chats')
             }
             else {
                 dispatch(
@@ -50,7 +51,7 @@ const Login = () => {
                 )
             }
         }
-        catch(error){
+        catch (error) {
             dispatch(
                 updateSnackBar({
                     open: true,
