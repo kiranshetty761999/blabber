@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useForm } from 'react-hook-form';
-import Button from '@mui/material/Button';
+import Button from '../../Button/Button';
 import IconButton from '@mui/material/IconButton';
 import OutlinedInput from '@mui/material/OutlinedInput';
 import InputLabel from '@mui/material/InputLabel';

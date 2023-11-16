@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useForm } from 'react-hook-form';
-import Button from '@mui/material/Button';
+import Button from '../../Button/Button'
 import IconButton from '@mui/material/IconButton';
 import OutlinedInput from '@mui/material/OutlinedInput';
 import InputLabel from '@mui/material/InputLabel';
@@ -9,14 +9,13 @@ import FormControl from '@mui/material/FormControl';
 import TextField from '@mui/material/TextField';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
-import CloudUploadOutlinedIcon from '@mui/icons-material/CloudUploadOutlined';
 import classes from './SignUp.module.css'
-import Loader from '../../Loader/Loader';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { SignUpOperation } from '../../../services/blabberApiHandler';
 import { updateSnackBar } from '../../../store/SnackBarSlice';
 import { useDispatch } from "react-redux";
 import { useNavigate } from 'react-router-dom'
+import ImageUpload from '../../ImageUpload/ImageUpload';
+import { useSelector } from "react-redux";
 
 const SignUp = () => {
     const {
@@ -25,17 +24,18 @@ const SignUp = () => {
         setError,
         clearErrors,
         formState: { errors },
-        watch,
     } = useForm();
+
     const navigate = useNavigate()
     const dispatch = useDispatch();
     const [showPassword, setShowPassword] = React.useState({
         password: false,
         confirmPassword: false,
     });
+    const store = useSelector((state) => state)
+    const imageLoaderState = store.imageUpload
+   
     const [picLoading, setPicLoading] = React.useState(false);
-    const [uploadSuccess, setUploadSuccess] = React.useState(false);
-    const [profileLink, setProfileLink] = React.useState('');
 
     const handleClickShowPassword = (field) => () => {
         setShowPassword((prev) => ({
@@ -44,55 +44,10 @@ const SignUp = () => {
         }));
     };
 
-    const handleFileInputChange = async (event) => {
-        const pic = event.target.files[0];
+    React.useEffect(()=>{
+        setPicLoading(imageLoaderState.loading)
 
-        setPicLoading(true);
-
-        if (!pic) {
-            clearErrors('image');
-            return;
-        }
-
-        if (!['image/jpeg', 'image/png'].includes(pic.type)) {
-            setError('image', {
-                type: 'custom',
-                message: 'Image must be in JPEG or PNG format',
-            });
-            event.target.value = '';
-            return;
-        }
-
-        if (pic.size > 5 * 1024 * 1024) {
-            setError('image', {
-                type: 'custom',
-                message: 'Image must be under 5MB',
-            });
-            event.target.value = '';
-            return;
-        }
-
-        const data = new FormData();
-        data.append('file', pic);
-        data.append('upload_preset', 'Blabber');
-        data.append('cloud_name', 'dxludokby');
-        fetch('https://api.cloudinary.com/v1_1/dxludokby/image/upload', {
-            method: 'post',
-            body: data,
-        })
-            .then((res) => res.json())
-            .then((data) => {
-                setProfileLink(data.url);
-                setPicLoading(false);
-                setUploadSuccess(true);
-            })
-            .catch((err) => {
-                console.log(err);
-                setPicLoading(false);
-            });
-
-        clearErrors('image');
-    };
+    },[imageLoaderState.loading])
 
     const onSubmit = async (data) => {
         const { password, confirmPassword } = data;
@@ -122,7 +77,7 @@ const SignUp = () => {
             name: data.name,
             email: data.email,
             password: data.password,
-            profilePic: profileLink,
+            profilePic: localStorage.getItem('uploadProfileLink'),
         };
 
         try {
@@ -133,6 +88,7 @@ const SignUp = () => {
                 localStorage.setItem('userId', response?.data?.data?.userId)
                 localStorage.setItem('profilePic', response?.data?.data?.profilePic)
                 localStorage.setItem('token', response?.data?.data?.token)
+                localStorage.removeItem('uploadProfileLink')
                 navigate('/chats')
             }
             else {
@@ -232,38 +188,11 @@ const SignUp = () => {
                         />
                         <span className={classes.error}>{errors.confirmPassword && errors.confirmPassword.message}</span>
                     </FormControl>
-                    <input
-                        type="file"
-                        id="imageInput"
-                        accept=".jpg, .jpeg, .png"
-                        onChange={handleFileInputChange}
-                        style={{ display: 'none' }}
-                    />
-
-                    <span className={classes.error}>{errors.image && errors.image.message}</span>
-                    <span style={{ width: '100%', textAlign: 'center' }}>Weave your visual charm</span>
-                    <span style={{ fontSize: '0.75rem' }}>  Upload an image (JPEG or PNG, max 5MB)</span>
-                    {!picLoading ? (
-                        uploadSuccess ? (
-                            <div className={classes.uploadSuccess}>
-                                <CheckCircleIcon />
-                                <span>Uploaded successfully</span>
-                            </div>
-                        ) : (
-                            <label htmlFor="imageInput">
-                                <CloudUploadOutlinedIcon
-                                    sx={{ fontSize: '5rem', color: '#707070', cursor: 'pointer' }}
-                                />
-                            </label>
-                        )
-                    ) : (
-                        <Loader />
-                    )}
-
+                            <ImageUpload />
                     <Button
                         type="submit"
                         variant="contained"
-                        sx={{ width: '100%', textTransform: 'initial', backgroundColor: '#7584F4' }}
+                        sx={{ width:'100%'}}
                         disabled={Object.keys(errors).length > 0 || picLoading}
                     >
                         Join the Blabber Babble!

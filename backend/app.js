@@ -4,6 +4,7 @@ const cors = require('cors')
 const connectToDb = require('./config/dbConnection')
 const userRouter = require('./routers/userRouter')
 const chatRouter = require('./routers/chatRouter')
+const errorMiddleware = require('./middlewares/errorMiddleware')
 
 const app = express()
 connectToDb()
@@ -18,14 +19,17 @@ app.use(
 
 
 const PORT = process.env.PORT || 4000
-app.use(express.json())
-app.use('/v1/user', userRouter)
-app.use('/v1/chat', chatRouter)
 
-app.get('/', (req, res) => {
-  res.send('<p><center><h1>API IS WORKING</h1></center></p>')
-})
+app.use(express.json());
+app.use('/v1/user', userRouter);
+app.use('/v1/chat', chatRouter);
 
-app.listen(4000, () => {
+
+
+
+app.use(errorMiddleware.notFound);
+app.use(errorMiddleware.errorHandler)
+
+app.listen(PORT, () => {
   console.log(`Blabber chat app server is operational on port ${PORT}.`)
 })

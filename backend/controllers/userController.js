@@ -1,7 +1,8 @@
 const User = require('../models/userModel')
 const generateAccessToken = require('../config/generateToken')
+const asyncHandler = require("express-async-handler");
 
-const login = async (req, res) => {
+const login = asyncHandler(async (req, res) => {
 
     const emailRegex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i;
 
@@ -32,10 +33,10 @@ const login = async (req, res) => {
     }
 
 
-}
+})
 
 
-const register = async (req, res) => {
+const register = asyncHandler(async (req, res) => {
     if (!req.body.name || !req.body.email || !req.body.password) {
         res.status(400);
         throw new Error('Please send all the details');
@@ -87,10 +88,36 @@ const register = async (req, res) => {
             throw Error('Failed to register the user');
         }
     }
-};
+});
 
-const getBlabberUsers = (req, res) => {
-    res.send('blabber users')
-}
+const getBlabberUsers = asyncHandler(async (req, res) => {
+    const { userid } = req.headers;
+
+    if (!userid) {
+        res.status(400);
+        throw new Error("Please send userid");
+    } else {
+        const filter = req.query?.filter || '';
+
+        const users = await User.find({
+            $and: [
+                {
+                    $or: [
+                        { name: { $regex: filter, $options: 'i' } },
+                        { email: { $regex: filter, $options: 'i' } },
+                    ],
+                },
+                { _id: { $ne: userid } },
+            ],
+        }).select('-password');
+
+        res.json({
+            success:true,
+            message:'User retrieved successfully',
+            data: users,
+        });
+    }
+});
+
 
 module.exports = { login, register, getBlabberUsers }

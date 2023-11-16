@@ -11,15 +11,20 @@
 .dropDown {
     color: black;
     padding: 1rem;
+    width: 80%;
     background: rgba(255, 255, 255, 0.75);
     box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
     backdrop-filter: blur(4px);
     -webkit-backdrop-filter: blur(4px);
     border-radius: 10px;
     border: 1px solid rgba(255, 255, 255, 0.18);
-    max-height: 50vh ;
-    overflow: auto ;
+    max-height: 30vh;
+    overflow: auto;
+    position: absolute; 
+    z-index: 1001;
+    top: 56%;
 }
+
 
 .searchContainer {
     display: inline-flex;
@@ -30,12 +35,14 @@
 }
 
 .menuItem {
+    width: 100%;
     padding: 10px;
     display: flex;
     gap:20px;
     align-items: center;
     cursor: pointer;
     border-bottom: 1px solid grey;
+    z-index: 3000;
 }
 
 .menuItem:hover {
@@ -52,4 +59,10 @@
     justify-content: center;
     align-items: center;
     gap:10px;
+}
+
+.error {
+    color: #d32f2f;
+    font-Size: 1rem;
+   text-align: center;
 }
