@@ -12,6 +12,7 @@ import { updateSnackBar } from '../../store/SnackBarSlice';
 import { updateGroupMembers } from '../../store/AddGroupSlice';
 import { Chip } from '@mui/material';
 
+
 function debounce(func, wait) {
     let timeout;
     return function (...args) {
@@ -36,7 +37,7 @@ const SearchBarWithChips = (props) => {
             const response = await getBlabberUsers(value);
             if (response.data.success) {
                 setDisplayMenu(true);
-                const data = response?.data?.data?.filter((item)=>!groupMembers.includes(item?.name))
+                const data = response?.data?.data?.filter((item) => !groupMembers.includes(item?.name))
                 console.log(data)
                 setMenuItems(data);
             } else {
@@ -62,20 +63,20 @@ const SearchBarWithChips = (props) => {
     const deleteGroupMembers = (user) => {
         const remainingGroupMembers = groupMembers.filter((filterItem) => filterItem._id !== user._id)
         setGroupMembers(remainingGroupMembers)
-        dispatch( updateGroupMembers({
-            groupMembers:remainingGroupMembers
+        dispatch(updateGroupMembers({
+            groupMembers: remainingGroupMembers
         }))
-        
+
     };
 
     const addGroupMembers = (user) => {
         if (groupMembers.length < 9) {
             setGroupMembers(prev => [...prev, user])
             setSearchValue(() => "")
-            dispatch( updateGroupMembers({
-                groupMembers:[...groupMembers, user]
+            dispatch(updateGroupMembers({
+                groupMembers: [...groupMembers, user]
             }))
-           
+
 
 
         }

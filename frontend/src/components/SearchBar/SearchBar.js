@@ -7,8 +7,12 @@ import InputLabel from '@mui/material/InputLabel';
 import { getBlabberUsers } from '../../services/blabberApiHandler';
 import ProfilePic from '../ProfilePic/ProfilePic';
 import DoNotDisturbAltIcon from '@mui/icons-material/DoNotDisturbAlt';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { updateSnackBar } from '../../store/SnackBarSlice';
+import { updateChatList } from '../../store/ChatSlice';
+import { updateGroupModal } from '../../store/AddGroupSlice';
+import { createBlabberChat } from '../../services/blabberApiHandler';
+import moment, { localeData } from 'moment';
 
 // Custom debounce function
 function debounce(func, wait) {
@@ -24,6 +28,8 @@ const SearchBar = (props) => {
     const [displayMenu, setDisplayMenu] = useState(false);
     const [menuItems, setMenuItems] = useState([]);
     const dispatch = useDispatch();
+    const store = useSelector((state) => state)
+    const chatList = store.chat
 
     // Create a debounced version of getMenuItems
     const debouncedGetMenuItems = debounce(async (value) => {
@@ -52,6 +58,91 @@ const SearchBar = (props) => {
         }
     }, 300); // Adjust the debounce delay (e.g., 300 milliseconds)
 
+    const createChat = async (item, payload, users) => {
+        try {
+            const response = await createBlabberChat(payload)
+            console.log(response?.data)
+            if (response?.data?.success) {
+
+                dispatch(
+                    updateGroupModal({
+                        open: false
+                    })
+                )
+
+                dispatch(
+                    updateChatList(
+                        {
+                            chatList: [{
+                                "_id": item._id,
+                                "isGroupChat": false,
+                                "users": users,
+                                "profilePic": localStorage.getItem('uploadProfileLink'),
+                                "createdAt": moment().toISOString(),
+                            }]
+                        }
+                    )
+                )
+                setDisplayMenu(false)
+
+
+                localStorage.removeItem('uploadProfileLink')
+
+            }
+            else {
+                dispatch(
+                    updateSnackBar({
+                        open: true,
+                        severity: 'error',
+                        message: 'Failed to create the group'
+                    })
+                )
+            }
+        }
+        catch (error) {
+            dispatch(
+                updateSnackBar({
+                    open: true,
+                    severity: 'error',
+                    message: 'Something went wrong'
+                })
+            )
+        }
+    }
+
+    const handleClick = async (item) => {
+        const currentUser = {
+            name: localStorage.getItem('name'),
+            email: localStorage.getItem('email'),
+            _id: localStorage.getItem('userId'),
+        }
+        const users = [{ ...item }, { ...currentUser }]
+
+        console.log(users)
+        const userList = users.map((item) => item._id)
+
+        const payload = {
+            isGroupChat: false,
+            users: userList
+        }
+
+        const userExists = chatList?.initialChatList?.filter((filterItem) => {
+            if (!filterItem?.isGroupChat) {
+                const isPresent = filterItem?.users?.some(user => user._id === item._id);
+                return isPresent;
+            }
+            return false; 
+        });
+        
+        
+        console.log(userExists)
+        if (userExists.length>0) {
+            alert("ide kano chattu")
+        }
+        else
+            createChat(item, payload, users)
+    }
+
     const getMenuItems = (e) => {
         // Call the debounced function when the user types
         debouncedGetMenuItems(e.target.value);
@@ -71,14 +162,15 @@ const SearchBar = (props) => {
                 InputProps={{
                     endAdornment: <InputAdornment position="end"><SearchIcon className={classes.searchIcon} /></InputAdornment>,
                 }}
+                onClick={(e) => e.stopPropagation()}
                 onChange={getMenuItems}
-                onBlur={hideMenuItem}
+                onMouseDown={hideMenuItem}
             />
             {displayMenu && (
                 <div className={classes.dropDown}>
                     {menuItems?.length > 0 ? (
                         menuItems?.map((item, index) => (
-                            <div className={classes.menuItem} key={index}>
+                            <div className={classes.menuItem} key={index} onClick={() => handleClick(item)}>
                                 <ProfilePic src={item.profilePic} />
                                 <span>{item.name}</span>
                             </div>

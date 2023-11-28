@@ -1,8 +1,9 @@
 const Message = require('../models/messageModel')
 const Chat = require('../models/chatModel')
 const asyncHandler = require("express-async-handler");
+const {Types: {ObjectId}} = require('mongoose');
 
-const createChat = asyncHandler(async (req, res) => {
+const createChat = asyncHandler(async (req, res) => { 
 
     const { isGroupChat, users, groupAdmin, chatName, profilePic } = req.body
 
@@ -12,7 +13,7 @@ const createChat = asyncHandler(async (req, res) => {
     }
     const chatExists = await Chat.find({ users: users })
 
-    if (!isGroupChat && chatExists) {
+    if (!isGroupChat && chatExists.length>0) {
         res.status(400);
         throw new Error("Chat already exists");
     }
@@ -116,24 +117,32 @@ const sendMessage = asyncHandler(async (req, res) => {
 })
 
 const getListOfChats = asyncHandler(async (req, res) => {
-    
-    const allChatsRetrieved = await Chat.find({})
-        .populate("users", "-password")
-        .populate("latestMessage")
-        .sort({ createdAt: -1 });
+    const { userid } = req.headers;
+
+    if (!userid) {
+        res.status(400);
+        throw new Error("Please send userid");
+    } else {
+        const allChatsRetrieved = await Chat.find({ users: { $in: [new Object(userid)] } })
+            .populate("users", "-password")
+            .populate("latestMessage")
+            .sort({ createdAt: -1 });
+
+        if (allChatsRetrieved) {
+            res.status(200).json({
+                success: true,
+                message: 'Chat list retrieved',
+                data: allChatsRetrieved
+            });
+        } else {
+            res.status(500);
+            throw new Error("Internal server error");
+        }
+    }
+});
 
 
-    if (allChatsRetrieved) {
-        res.status(200).json({
-            success: true,
-            message: 'Chat list retrieved',
-            data: allChatsRetrieved
-        })
-    }
-    else {
-        res.status(500)
-        throw new Error("Internal server error")
-    }
-})
+
+
 
 module.exports = { getIndividualChat, sendMessage, getListOfChats, createChat }

@@ -33,10 +33,18 @@
     margin: 0px;
 }
 
+.unread{
+    color:#7584f4
+}
+
 .latestMessage {
     margin-top: 0.5rem;
 }
 
 .container:hover {
     background-color: #e5eef9;
+}
+
+.selected{
+    background-color: #e5eef9 !important;
 }

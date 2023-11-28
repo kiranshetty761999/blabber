@@ -12,6 +12,8 @@ import ImageUpload from '../ImageUpload/ImageUpload';
 import { createBlabberChat } from '../../services/blabberApiHandler';
 import { updateSnackBar } from '../../store/SnackBarSlice';
 import { useForm } from 'react-hook-form';
+import { updateChatList } from '../../store/ChatSlice';
+import moment from 'moment'
 
 const style = {
     position: 'absolute',
@@ -48,6 +50,7 @@ const CreateGroup = (props) => {
     const dispatch = useDispatch()
 
     const handleCreateGroup = async () => {
+        const currentUser = localStorage.getItem('userId')
         if (addGroupState.groupMembers?.length === 0) {
             setError('group', {
                 type: 'custom',
@@ -59,8 +62,8 @@ const CreateGroup = (props) => {
 
         const payload = {
             isGroupChat: true,
-            users: users,
-            groupAdmin: localStorage.getItem('userId'),
+            users: [...users,currentUser],
+            groupAdmin:currentUser ,
             chatName: chatName,
             profilePic: localStorage.getItem('uploadProfileLink'),
         }
@@ -90,6 +93,24 @@ const CreateGroup = (props) => {
                         groupMembers: []
                     }))
                 )
+
+                dispatch(
+                    updateChatList(
+                        {
+                            chatList: [{
+                                "_id": response?.data?.chatId,
+                                "isGroupChat": true,
+                                "users": users,
+                                "groupAdmin": localStorage.getItem('userId'),
+                                "chatName": chatName,
+                                "profilePic": localStorage.getItem('uploadProfileLink'),
+                                "createdAt": moment().toISOString(),
+                            }]
+                        }
+                    )
+                )
+
+
                 localStorage.removeItem('uploadProfileLink')
                 reset()
 
